@@ -33,6 +33,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "asset", "asset", "{10468526
 		global.json = global.json
 		LICENSE = LICENSE
 		nuget.config = nuget.config
+		README.md = README.md
 	EndProjectSection
 EndProject
 Global
