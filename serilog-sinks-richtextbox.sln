@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WpfNet45Sample", "sample\Wp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{F117EDB3-857E-491C-98B0-325415BD589E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.RichTextBox.Wpf.Tests", "test\Serilog.Sinks.RichTextBox.Wpf.Tests\Serilog.Sinks.RichTextBox.Wpf.Tests.csproj", "{AB272461-151B-4FD9-90DD-A7B046C92208}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.RichTextBox.Wpf.Tests", "test\Serilog.Sinks.RichTextBox.Wpf.Tests\Serilog.Sinks.RichTextBox.Wpf.Tests.csproj", "{AB272461-151B-4FD9-90DD-A7B046C92208}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "asset", "asset", "{10468526-2705-46FE-A1FD-D5ED894344B2}"
 	ProjectSection(SolutionItems) = preProject
@@ -35,6 +35,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "asset", "asset", "{10468526
 		nuget.config = nuget.config
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinFormsHostNet50Sample", "sample\WinFormsHostNet50Sample\WinFormsHostNet50Sample.csproj", "{5CE41592-6B8C-4F4C-9BAE-E194319A0C3D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,6 +60,10 @@ Global
 		{AB272461-151B-4FD9-90DD-A7B046C92208}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB272461-151B-4FD9-90DD-A7B046C92208}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB272461-151B-4FD9-90DD-A7B046C92208}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5CE41592-6B8C-4F4C-9BAE-E194319A0C3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CE41592-6B8C-4F4C-9BAE-E194319A0C3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CE41592-6B8C-4F4C-9BAE-E194319A0C3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CE41592-6B8C-4F4C-9BAE-E194319A0C3D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -67,6 +73,7 @@ Global
 		{63C19AE3-4AFC-4D86-ADBA-C49A220A3F7F} = {45E3C95E-AA82-489D-9719-51FABF5A94BB}
 		{1BB75390-59CF-4EB4-AC86-A28F5493C699} = {FFBAB97D-C419-4D6B-88B0-4169211682ED}
 		{AB272461-151B-4FD9-90DD-A7B046C92208} = {F117EDB3-857E-491C-98B0-325415BD589E}
+		{5CE41592-6B8C-4F4C-9BAE-E194319A0C3D} = {FFBAB97D-C419-4D6B-88B0-4169211682ED}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A5541D82-B4FC-4D51-8998-FF8E451FE097}
