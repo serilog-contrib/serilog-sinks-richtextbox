@@ -1,0 +1,19 @@
+version: 2
+updates:
+  - package-ecosystem: "nuget"
+    directory: "/src"
+    schedule:
+      interval: "daily"
+    target-branch: "master"
+    ignore:
+      - dependency-name: "Serilog"
+  - package-ecosystem: "nuget"
+    directory: "/test"
+    schedule:
+      interval: "daily"
+    target-branch: "master"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    target-branch: "master"
