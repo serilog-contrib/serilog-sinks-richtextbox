@@ -63,7 +63,7 @@ Task("pack")
     .IsDependentOn("test")
     .Does(() =>
 {
-    var releaseNotes = $"https://github.com/augustoproiete/serilog-sinks-richtextbox/releases/tag/v{buildVersion.Version}";
+    var releaseNotes = $"https://github.com/serilog-contrib/serilog-sinks-richtextbox/releases/tag/v{buildVersion.Version}";
 
     DotNetCorePack("./src/Serilog.Sinks.RichTextBox.Wpf/Serilog.Sinks.RichTextBox.Wpf.csproj", new DotNetCorePackSettings
     {

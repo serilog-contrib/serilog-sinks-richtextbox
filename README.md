@@ -96,7 +96,7 @@ The default template, shown in the example above, uses built-in properties like 
 
 ## Release History
 
-Click on the [Releases](https://github.com/augustoproiete/serilog-sinks-richtextbox/releases) tab on GitHub.
+Click on the [Releases](https://github.com/serilog-contrib/serilog-sinks-richtextbox/releases) tab on GitHub.
 
 ---
 

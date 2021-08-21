@@ -35,14 +35,14 @@
     <Company>augustoproiete.net</Company>
     <Description>A Serilog sink that writes log events to any WPF RichTextBox control with coloring and custom theme support.</Description>
     <Copyright>Copyright 2021 C. Augusto Proiete &amp; Contributors - Provided under the Apache License, Version 2.0</Copyright>
-    <PackageTags>serilog;sinks;richtextbox;wpf;windows;sink;colored;colors;color;theme;themes;windows-presentation-foundation;textbox</PackageTags>
+    <PackageTags>serilog;sinks;richtextbox;wpf;windows;sink;colored;colors;color;theme;themes;windows-presentation-foundation;textbox;serilog-sink;serilog-contrib;augustoproiete;augusto-proiete</PackageTags>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageIcon>images\icon.png</PackageIcon>
     <PackageIconUrl>http://serilog.net/images/serilog-sink-nuget.png</PackageIconUrl>
-    <PackageProjectUrl>https://github.com/augustoproiete/serilog-sinks-richtextbox</PackageProjectUrl>
-    <PackageReleaseNotes>https://github.com/augustoproiete/serilog-sinks-richtextbox/releases</PackageReleaseNotes>
+    <PackageProjectUrl>https://github.com/serilog-contrib/serilog-sinks-richtextbox</PackageProjectUrl>
+    <PackageReleaseNotes>https://github.com/serilog-contrib/serilog-sinks-richtextbox/releases</PackageReleaseNotes>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/augustoproiete/serilog-sinks-richtextbox.git</RepositoryUrl>
+    <RepositoryUrl>https://github.com/serilog-contrib/serilog-sinks-richtextbox.git</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup>

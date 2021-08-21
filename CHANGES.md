@@ -1,1 +1,1 @@
-See: https://github.com/augustoproiete/serilog-sinks-richtextbox/releases
+See: https://github.com/serilog-contrib/serilog-sinks-richtextbox/releases
