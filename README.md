@@ -27,7 +27,7 @@ If you like or are using this project please give it a star. Thanks!
 Install the [Serilog.Sinks.RichTextBox.Wpf](https://www.nuget.org/packages/Serilog.Sinks.RichTextBox.Wpf) package from NuGet:
 
 ```powershell
-Install-Package Serilog.Sinks.RichTextBox.Wpf
+Install-Package Serilog.Sinks.RichTextBox.Wpf -Prerelease
 ```
 
 Declare your [RichTextBox](https://docs.microsoft.com/en-us/dotnet/desktop/wpf/controls/richtextbox-overview?view=netframeworkdesktop-4.8) control and give it a name that you can reference it from the code-behind. e.g.:
