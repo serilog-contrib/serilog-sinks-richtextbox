@@ -19,7 +19,7 @@ using System.Diagnostics;
 using System.Windows;
 using Serilog;
 
-namespace WpfNet45Sample
+namespace WpfNet462Sample
 {
     /// <summary>
     /// Interaction logic for App.xaml

@@ -11,7 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{45E3C95E-AA8
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.RichTextBox.Wpf", "src\Serilog.Sinks.RichTextBox.Wpf\Serilog.Sinks.RichTextBox.Wpf.csproj", "{63C19AE3-4AFC-4D86-ADBA-C49A220A3F7F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WpfNet45Sample", "sample\WpfNet45Sample\WpfNet45Sample.csproj", "{1BB75390-59CF-4EB4-AC86-A28F5493C699}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WpfNet462Sample", "sample\WpfNet462Sample\WpfNet462Sample.csproj", "{1BB75390-59CF-4EB4-AC86-A28F5493C699}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{F117EDB3-857E-491C-98B0-325415BD589E}"
 EndProject

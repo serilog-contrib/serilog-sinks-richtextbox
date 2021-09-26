@@ -12,7 +12,7 @@
 
 A [Serilog](https://serilog.net) sink that writes log events to any WPF [RichTextBox](https://docs.microsoft.com/en-us/dotnet/desktop/wpf/controls/richtextbox-overview?view=netframeworkdesktop-4.8) control with coloring and custom theme support.
 
-[![NuGet Version](http://img.shields.io/nuget/v/Serilog.Sinks.RichTextBox.Wpf.svg?style=flat)](https://www.nuget.org/packages/Serilog.Sinks.RichTextBox.Wpf) [![.NET](https://img.shields.io/badge/.NET%20-%3E%3D%205.0-512bd4)](https://dotnet.microsoft.com/download) [![.NET Core](https://img.shields.io/badge/.NET%20Core-%3E%3D%203.1-512bd4)](https://dotnet.microsoft.com/download) [![.NET Framework](https://img.shields.io/badge/.NET%20Framework-%3E%3D%204.5-512bd4)](https://dotnet.microsoft.com/download) [![Stack Overflow](https://img.shields.io/badge/stack%20overflow-serilog-orange.svg)](http://stackoverflow.com/questions/tagged/serilog)
+[![NuGet Version](http://img.shields.io/nuget/v/Serilog.Sinks.RichTextBox.Wpf.svg?style=flat)](https://www.nuget.org/packages/Serilog.Sinks.RichTextBox.Wpf) [![.NET](https://img.shields.io/badge/.NET%20-%3E%3D%205.0-512bd4)](https://dotnet.microsoft.com/download) [![.NET Core](https://img.shields.io/badge/.NET%20Core-%3E%3D%203.1-512bd4)](https://dotnet.microsoft.com/download) [![.NET Framework](https://img.shields.io/badge/.NET%20Framework-%3E%3D%204.6.2-512bd4)](https://dotnet.microsoft.com/download) [![Stack Overflow](https://img.shields.io/badge/stack%20overflow-serilog-orange.svg)](http://stackoverflow.com/questions/tagged/serilog)
 
 ![Screenshot of Serilog.Sinks.RichTextBox.Wpf in action](asset/serilog-sinks-richtextbox-screenshot.png)
 
@@ -50,7 +50,7 @@ Then enable the sink using `WriteTo.RichTextBox()`:
 Log.Logger = new LoggerConfiguration()
     .WriteTo.RichTextBox(MyRichTextBox)
     .CreateLogger();
-    
+
 Log.Information("Hello, world!");
 ```
 
@@ -74,7 +74,7 @@ Themes can be specified when configuring the sink:
 
 The following built-in themes are available at this time:
 
-| Theme                               | Description                            
+| Theme                               | Description
 | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | `RichTextBoxTheme.None`             | No styling. Uses default styles applied to the `RichTextBox` control                                                  |
 | `RichTextBoxConsoleTheme.Literate`  | Styled to replicate the default theme of  _Serilog.Sinks.Console_; **This is the default when no theme is specified** |

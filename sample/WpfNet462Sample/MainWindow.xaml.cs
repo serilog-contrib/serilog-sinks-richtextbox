@@ -23,7 +23,7 @@ using System.Windows;
 using Serilog;
 using Serilog.Debugging;
 
-namespace WpfNet45Sample
+namespace WpfNet462Sample
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -142,10 +142,10 @@ namespace WpfNet45Sample
                     Log.Error("Hello from Task.Run({StepName}) Error", stepName);
                     Log.Fatal("Hello from Task.Run({StepName}) Fatal", stepName);
                 });
-            
+
                 tasks.Add(task);
             }
-            
+
             await Task.WhenAll(tasks);
         }
     }
