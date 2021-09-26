@@ -28,6 +28,8 @@ jobs:
         job:
           - os: windows-2019
             build: ./build.cmd
+          - os: windows-2022
+            build: ./build.cmd
     name: ${{ matrix.job.os }}
     runs-on: ${{ matrix.job.os }}
     steps:
