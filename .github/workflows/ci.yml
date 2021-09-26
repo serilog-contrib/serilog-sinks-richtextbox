@@ -28,6 +28,7 @@ jobs:
         job:
           - os: windows-2019
             build: ./build.cmd
+            push: true
           - os: windows-2022
             build: ./build.cmd
     name: ${{ matrix.job.os }}
@@ -48,3 +49,10 @@ jobs:
           fetch-depth: 0
       - name: Build
         run: ${{ matrix.job.build }} --verbosity=diagnostic --target=pack
+      - name: Publish artifacts
+        if: matrix.job.push && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/'))
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          if-no-files-found: warn
+          name: package
+          path: artifact/nuget/**/*

@@ -7,11 +7,8 @@ var buildVersion = MinVer(s => s.WithTagPrefix("v").WithDefaultPreReleasePhase("
 Task("clean")
     .Does(() =>
 {
-    CleanDirectories("./artifacts/**");
-    CleanDirectories("./src/**/bin");
-    CleanDirectories("./src/**/obj");
-    CleanDirectories("./test/**/bin");
-    CleanDirectories("./test/**/obj");
+    CleanDirectories("./artifact/**");
+    CleanDirectories("./**/^{bin,obj}");
 });
 
 Task("restore")
@@ -33,11 +30,11 @@ Task("build")
         Configuration = configuration,
         NoRestore = true,
         NoIncremental = false,
-        ArgumentCustomization = args =>
-            args.AppendQuoted($"-p:Version={buildVersion.Version}")
-                .AppendQuoted($"-p:AssemblyVersion={buildVersion.FileVersion}")
-                .AppendQuoted($"-p:FileVersion={buildVersion.FileVersion}")
-                .AppendQuoted($"-p:ContinuousIntegrationBuild=true")
+        MSBuildSettings = new DotNetCoreMSBuildSettings()
+            .WithProperty("Version", buildVersion.Version)
+            .WithProperty("AssemblyVersion", buildVersion.AssemblyVersion)
+            .WithProperty("FileVersion", buildVersion.FileVersion)
+            .WithProperty("ContinuousIntegrationBuild", BuildSystem.IsLocalBuild ? "false" : "true")
     });
 });
 
@@ -70,10 +67,10 @@ Task("pack")
         Configuration = "Release",
         NoRestore = true,
         NoBuild = true,
-        OutputDirectory = "./artifacts/nuget",
-        ArgumentCustomization = args =>
-            args.AppendQuoted($"-p:Version={buildVersion.Version}")
-                .AppendQuoted($"-p:PackageReleaseNotes={releaseNotes}")
+        OutputDirectory = "./artifact/nuget",
+        MSBuildSettings = new DotNetCoreMSBuildSettings()
+            .WithProperty("Version", buildVersion.Version)
+            .WithProperty("PackageReleaseNotes", releaseNotes)
     });
 });
 
@@ -101,7 +98,7 @@ Task("push")
         ApiKey = apiKey,
     };
 
-    foreach (var nugetPackageFile in GetFiles("./artifacts/nuget/*.nupkg"))
+    foreach (var nugetPackageFile in GetFiles("./artifact/nuget/*.nupkg"))
     {
         DotNetCoreNuGetPush(nugetPackageFile.FullPath, nugetPushSettings);
     }
