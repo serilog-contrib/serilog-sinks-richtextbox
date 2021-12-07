@@ -20,16 +20,19 @@ using System.Windows.Documents;
 using System.Windows.Markup;
 using System.Windows.Threading;
 using Serilog.Debugging;
+using Serilog.Sinks.RichTextBox.Output;
 
 namespace Serilog.Sinks.RichTextBox.Abstraction
 {
     internal class RichTextBoxImpl : IRichTextBox
     {
         private readonly System.Windows.Controls.RichTextBox _richTextBox;
+        private readonly IRichTextBoxOutputAppender _outputAppender;
 
-        public RichTextBoxImpl(System.Windows.Controls.RichTextBox richTextBox)
+        public RichTextBoxImpl(System.Windows.Controls.RichTextBox richTextBox, IRichTextBoxOutputAppender outputAppender)
         {
             _richTextBox = richTextBox ?? throw new ArgumentNullException(nameof(richTextBox));
+            _outputAppender = outputAppender ?? throw new ArgumentNullException(nameof(outputAppender));
         }
 
         public void Write(string xamlParagraphText)
@@ -45,20 +48,8 @@ namespace Serilog.Sinks.RichTextBox.Abstraction
                 SelfLog.WriteLine($"Error parsing `{xamlParagraphText}` to XAML: {ex.Message}");
                 throw;
             }
+            _outputAppender.Append(_richTextBox, parsedParagraph);
 
-            var inlines = parsedParagraph.Inlines.ToList();
-
-            var richTextBox = _richTextBox;
-
-            var flowDocument = richTextBox.Document ??= new FlowDocument();
-
-            if (flowDocument.Blocks.LastBlock is not Paragraph paragraph)
-            {
-                paragraph = new Paragraph();
-                flowDocument.Blocks.Add(paragraph);
-            }
-
-            paragraph.Inlines.AddRange(inlines);
         }
 
         public bool CheckAccess()
