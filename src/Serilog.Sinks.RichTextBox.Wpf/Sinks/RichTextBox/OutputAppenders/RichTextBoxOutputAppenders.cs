@@ -1,9 +1,12 @@
-﻿namespace Serilog.Sinks.RichTextBox.Output {
-    public static class RichTextBoxOutputAppenders {
+﻿namespace Serilog.Sinks.RichTextBox.Output
+{
+    public static class RichTextBoxOutputAppenders
+    {
         public static IRichTextBoxOutputAppender Legacy { get; }
         public static IRichTextBoxOutputAppender Default { get; }
 
-        static RichTextBoxOutputAppenders() {
+        static RichTextBoxOutputAppenders()
+        {
             var LegacyArgs = new InlinesRichTextBoxOutputAppenderArgs() {
                 ScrollOnChange = false,
             };
