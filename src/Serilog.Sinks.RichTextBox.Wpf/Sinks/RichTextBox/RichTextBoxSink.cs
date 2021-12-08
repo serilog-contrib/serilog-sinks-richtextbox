@@ -15,14 +15,20 @@
 #endregion
 
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Windows.Threading;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.RichTextBox.Abstraction;
+
+
 
 namespace Serilog.Sinks.RichTextBox
 {
@@ -36,6 +42,10 @@ namespace Serilog.Sinks.RichTextBox
         private readonly RenderAction _renderAction;
         private const int _defaultWriteBufferCapacity = 256;
 
+        private const int _batchSize = 200;
+        private Thread _consumerThread;
+        private ConcurrentQueue<LogEvent> _messageQueue;
+
         public RichTextBoxSink(IRichTextBox richTextBox, ITextFormatter formatter, DispatcherPriority dispatcherPriority, object syncRoot)
         {
             _richTextBox = richTextBox ?? throw new ArgumentNullException(nameof(richTextBox));
@@ -43,7 +53,7 @@ namespace Serilog.Sinks.RichTextBox
 
             if (!Enum.IsDefined(typeof(DispatcherPriority), dispatcherPriority))
             {
-                throw new InvalidEnumArgumentException(nameof(dispatcherPriority), (int) dispatcherPriority,
+                throw new InvalidEnumArgumentException(nameof(dispatcherPriority), (int)dispatcherPriority,
                     typeof(DispatcherPriority));
             }
 
@@ -51,27 +61,84 @@ namespace Serilog.Sinks.RichTextBox
             _syncRoot = syncRoot ?? throw new ArgumentNullException(nameof(syncRoot));
 
             _renderAction = Render;
+
+            _messageQueue = new ConcurrentQueue<LogEvent>();
+
+            _consumerThread = new Thread(new ThreadStart(ProcessMessages)) { IsBackground = true };
+            _consumerThread.Start();
+        }
+
+        private enum States
+        {
+            Init,
+            Dequeue,
+            Log,
+        }
+
+        private void ProcessMessages()
+        {
+            StringBuilder sb = new();
+            Stopwatch sw = Stopwatch.StartNew();
+            States state = States.Init;
+            int msgCounter = 0;
+
+            while (true)
+            {
+                switch (state)
+                {
+                    //prepare the string builder and data
+                    case States.Init:
+                        sb.Clear();
+                        sb.Append($"<Paragraph xmlns =\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" xml:space=\"preserve\">");
+                        msgCounter = 0;
+                        state = States.Dequeue;
+                        break;
+
+                    case States.Dequeue:
+                        if (sw.Elapsed.TotalMilliseconds >= 25 || msgCounter >= _batchSize)
+                        {
+                            if (msgCounter == 0)
+                            {
+                                //no messages, retick
+                                sw.Restart();
+                            }
+                            else
+                            {
+                                //valid log condition
+                                state = States.Log;
+                                break;
+                            }
+                        }
+
+                        if (_messageQueue.TryDequeue(out LogEvent logEvent) == false)
+                        {
+                            Thread.Sleep(1);
+                            continue;
+                        }
+
+                        StringWriter writer = new();
+                        _formatter.Format(logEvent, writer);
+
+                        //got a message from the queue, retick
+                        sw.Restart();
+
+                        msgCounter++;
+                        sb.Append(writer.ToString());
+                        break;
+
+                    case States.Log:
+                        sb.Append("</Paragraph>");
+                        string xamlParagraphText = sb.ToString();
+                        _richTextBox.BeginInvoke(_dispatcherPriority, _renderAction, xamlParagraphText);
+                        state = States.Init;
+                        break;
+                }
+            }
         }
 
         public void Emit(LogEvent logEvent)
-        {
-            var buffer = new StringWriter(new StringBuilder(_defaultWriteBufferCapacity));
-            _formatter.Format(logEvent, buffer);
-
-            var formattedLogEventText = buffer.ToString();
-
-            var xamlParagraphText =
-                $"<Paragraph xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" xml:space=\"preserve\">{formattedLogEventText}</Paragraph>";
-
-            var richTextBox = _richTextBox;
-
-            if (!richTextBox.CheckAccess())
-            {
-                richTextBox.BeginInvoke(_dispatcherPriority, _renderAction, xamlParagraphText);
-                return;
-            }
-
-            Render(xamlParagraphText);
+        {            
+            _messageQueue.Enqueue(logEvent);
         }
 
         private void Render(string xamlParagraphText)
