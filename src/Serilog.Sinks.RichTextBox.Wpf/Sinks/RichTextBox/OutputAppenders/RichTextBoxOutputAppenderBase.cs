@@ -1,16 +1,17 @@
-﻿using System.Windows.Documents;
+﻿using System.Collections.Generic;
+using System.Windows.Documents;
 
 namespace Serilog.Sinks.RichTextBox.Output
 {
     public abstract class RichTextBoxOutputAppenderBase : IRichTextBoxOutputAppender
     {
-        public void Append(System.Windows.Controls.RichTextBox richTextBox, Paragraph paragraph)
+        public void Append(System.Windows.Controls.RichTextBox richTextBox, List<Paragraph> paragraphs)
         {
             var flowDocument = richTextBox.Document ??= new FlowDocument();
-            Append(richTextBox, flowDocument, paragraph);
+            Append(richTextBox, flowDocument, paragraphs);
         }
 
-        protected abstract void Append(System.Windows.Controls.RichTextBox richTextBox, FlowDocument document, Paragraph paragraph);
+        protected abstract void Append(System.Windows.Controls.RichTextBox richTextBox, FlowDocument document, List<Paragraph> paragraphs);
 
     }
 

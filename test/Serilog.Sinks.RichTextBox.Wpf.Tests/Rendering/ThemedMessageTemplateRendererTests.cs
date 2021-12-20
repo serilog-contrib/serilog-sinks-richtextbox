@@ -44,7 +44,7 @@ namespace Serilog.Sinks.RichTextBox.Wpf.Tests.Rendering
             // ReSharper disable UnusedMember.Local
             public decimal Sum => 12.345m;
 
-            public DateTime When => new DateTime(2013, 5, 20, 16, 39, 0);
+            public DateTime When => new(2013, 5, 20, 16, 39, 0);
 
             // ReSharper restore UnusedMember.Local
             public override string ToString() => "a receipt";

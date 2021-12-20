@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Documents;
 
 namespace Serilog.Sinks.RichTextBox.Output
@@ -10,15 +11,23 @@ namespace Serilog.Sinks.RichTextBox.Output
 
         }
 
-        protected override void Append(System.Windows.Controls.RichTextBox richTextBox, FlowDocument document, Paragraph paragraph)
+        protected override void Append(System.Windows.Controls.RichTextBox richTextBox, FlowDocument document, List<Paragraph> paragraphs)
         {
+            var inlines = (
+                from x in paragraphs
+                from y in x.Inlines
+                select y
+                ).ToList();
+
             if (document.Blocks.LastBlock is Paragraph { } target)
             {
-                var inlines = paragraph.Inlines.ToList();
                 target.Inlines.AddRange(inlines);
             }
             else
             {
+                var paragraph = new Paragraph();
+                paragraph.Inlines.AddRange(inlines);
+
                 document.Blocks.Add(paragraph);
             }
 

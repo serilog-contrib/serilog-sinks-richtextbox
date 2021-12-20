@@ -15,7 +15,9 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Documents;
 using System.Windows.Markup;
 using System.Windows.Threading;
@@ -26,40 +28,59 @@ namespace Serilog.Sinks.RichTextBox.Abstraction
 {
     internal class RichTextBoxImpl : IRichTextBox
     {
-        private readonly System.Windows.Controls.RichTextBox _richTextBox;
+        private readonly DispatcherPriority _priority;
+        private readonly System.Windows.Controls.RichTextBox[] _richTextBoxes;
+        private readonly ILookup<Dispatcher, System.Windows.Controls.RichTextBox> _richTextBoxesByDispatcher;
         private readonly IRichTextBoxOutputAppender _outputAppender;
+        
 
-        public RichTextBoxImpl(System.Windows.Controls.RichTextBox richTextBox, IRichTextBoxOutputAppender outputAppender)
+        public RichTextBoxImpl(DispatcherPriority priority, IRichTextBoxOutputAppender outputAppender, params System.Windows.Controls.RichTextBox[] richTextBoxes)
         {
-            _richTextBox = richTextBox ?? throw new ArgumentNullException(nameof(richTextBox));
+            _priority = priority;
+            _richTextBoxes = richTextBoxes?.ToArray() ?? throw new ArgumentNullException(nameof(richTextBoxes));
             _outputAppender = outputAppender ?? throw new ArgumentNullException(nameof(outputAppender));
+
+            _richTextBoxesByDispatcher = _richTextBoxes.ToLookup(x => x.Dispatcher);
         }
 
-        public void Write(string xamlParagraphText)
+        private void Write(List<string> xamlParagraphTexts, IEnumerable<System.Windows.Controls.RichTextBox> richTextBoxes)
         {
-            Paragraph parsedParagraph;
-
-            try
+            foreach (var richTextBox in richTextBoxes)
             {
-                parsedParagraph = (Paragraph) XamlReader.Parse(xamlParagraphText);
+
+                var parsedParagraphs = new List<Paragraph>();
+
+                foreach (var xamlParagraphText in xamlParagraphTexts)
+                {
+                    
+                   try
+                    {
+                        var parsedParagraph = (Paragraph)XamlReader.Parse(xamlParagraphText);
+                        parsedParagraphs.Add(parsedParagraph);
+
+                    } catch (XamlParseException ex)
+                    {
+                        SelfLog.WriteLine($"Error parsing `{xamlParagraphText}` to XAML: {ex.Message}");
+                        throw;
+                    }
+                }
+
+                _outputAppender.Append(richTextBox, parsedParagraphs);
             }
-            catch (XamlParseException ex)
+
+        }
+
+        public async Task WriteAsync(List<string> xamlParagraphTexts)
+        {
+            foreach (var Pair in _richTextBoxesByDispatcher)
             {
-                SelfLog.WriteLine($"Error parsing `{xamlParagraphText}` to XAML: {ex.Message}");
-                throw;
+                await Pair.Key.InvokeAsync(() => Write(xamlParagraphTexts, Pair), _priority).Task
+                    .ConfigureAwait(false)
+                    ;
+
             }
-            _outputAppender.Append(_richTextBox, parsedParagraph);
 
         }
 
-        public bool CheckAccess()
-        {
-            return _richTextBox.CheckAccess();
-        }
-
-        public DispatcherOperation BeginInvoke(DispatcherPriority priority, Delegate method, object arg)
-        {
-            return _richTextBox.Dispatcher.BeginInvoke(priority, method, arg);
-        }
     }
 }

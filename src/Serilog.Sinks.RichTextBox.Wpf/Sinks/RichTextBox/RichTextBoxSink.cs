@@ -22,6 +22,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
+using System.Threading.Channels;
+using System.Threading.Tasks;
 using System.Windows.Threading;
 using Serilog.Core;
 using Serilog.Events;
@@ -36,125 +38,89 @@ namespace Serilog.Sinks.RichTextBox
     {
         private readonly IRichTextBox _richTextBox;
         private readonly ITextFormatter _formatter;
-        private readonly DispatcherPriority _dispatcherPriority;
-        private readonly object _syncRoot;
 
-        private readonly RenderAction _renderAction;
-        private const int _defaultWriteBufferCapacity = 256;
+        private readonly Task _consumerThread;
+        private readonly ChannelReader<LogEvent> _messageReader;
+        private readonly ChannelWriter<LogEvent> _messageWriter;
 
-        private const int _batchSize = 200;
-        private Thread _consumerThread;
-        private ConcurrentQueue<LogEvent> _messageQueue;
-
-        public RichTextBoxSink(IRichTextBox richTextBox, ITextFormatter formatter, DispatcherPriority dispatcherPriority, object syncRoot)
+        public RichTextBoxSink(IRichTextBox richTextBox, ITextFormatter formatter)
         {
             _richTextBox = richTextBox ?? throw new ArgumentNullException(nameof(richTextBox));
             _formatter = formatter ?? throw new ArgumentNullException(nameof(formatter));
 
-            if (!Enum.IsDefined(typeof(DispatcherPriority), dispatcherPriority))
-            {
-                throw new InvalidEnumArgumentException(nameof(dispatcherPriority), (int)dispatcherPriority,
-                    typeof(DispatcherPriority));
-            }
+            var chan = Channel.CreateUnbounded<LogEvent>(new UnboundedChannelOptions() {
+                AllowSynchronousContinuations = false,
+                SingleReader = true,
+                SingleWriter = false,
+            });
 
-            _dispatcherPriority = dispatcherPriority;
-            _syncRoot = syncRoot ?? throw new ArgumentNullException(nameof(syncRoot));
+            _messageReader = chan.Reader;
+            _messageWriter = chan.Writer;
 
-            _renderAction = Render;
-
-            _messageQueue = new ConcurrentQueue<LogEvent>();
-
-            _consumerThread = new Thread(new ThreadStart(ProcessMessages)) { IsBackground = true };
-            _consumerThread.Start();
+            _consumerThread = Task.Run(ProcessMessages);
         }
 
-        private enum States
+        private async Task ProcessMessages()
         {
-            Init,
-            Dequeue,
-            Log,
-        }
 
-        private void ProcessMessages()
-        {
-            StringBuilder sb = new();
-            Stopwatch sw = Stopwatch.StartNew();
-            States state = States.Init;
-            int msgCounter = 0;
+            var moredata = true;
 
-            while (true)
+            while (moredata)
             {
-                switch (state)
+                moredata = await _messageReader.WaitToReadAsync()
+                    .ConfigureAwait(false)
+                    ;
+
+                if (moredata)
                 {
-                    //prepare the string builder and data
-                    case States.Init:
-                        sb.Clear();
+                    await Task.Delay(100)
+                        .ConfigureAwait(false)
+                        ;
+
+                    var xamlParagraphMessages = new List<string>();
+
+                    while (_messageReader.TryRead(out var logEvent))
+                    {
+                        var sb = new StringBuilder();
                         sb.Append($"<Paragraph xmlns =\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" xml:space=\"preserve\">");
-                        msgCounter = 0;
-                        state = States.Dequeue;
-                        break;
-
-                    case States.Dequeue:
-                        if (sw.Elapsed.TotalMilliseconds >= 25 || msgCounter >= _batchSize)
-                        {
-                            if (msgCounter == 0)
-                            {
-                                //no messages, retick
-                                sw.Restart();
-                            }
-                            else
-                            {
-                                //valid log condition
-                                state = States.Log;
-                                break;
-                            }
-                        }
-
-                        if (_messageQueue.TryDequeue(out LogEvent logEvent) == false)
-                        {
-                            Thread.Sleep(1);
-                            continue;
-                        }
 
                         StringWriter writer = new();
                         _formatter.Format(logEvent, writer);
-
-                        //got a message from the queue, retick
-                        sw.Restart();
-
-                        msgCounter++;
                         sb.Append(writer.ToString());
-                        break;
-
-                    case States.Log:
                         sb.Append("</Paragraph>");
-                        string xamlParagraphText = sb.ToString();
-                        _richTextBox.BeginInvoke(_dispatcherPriority, _renderAction, xamlParagraphText);
-                        state = States.Init;
-                        break;
+
+                        var xamlParagraphText = sb.ToString();
+                        xamlParagraphMessages.Add(xamlParagraphText);
+                    }
+
+                    if(xamlParagraphMessages.Count > 1)
+                    {
+
+                    }
+
+                    if (xamlParagraphMessages.Count > 0) {
+
+                        await _richTextBox.WriteAsync(xamlParagraphMessages)
+                            .ConfigureAwait(false)
+                            ;
+
+                    }
+
                 }
+
             }
+
         }
 
         public void Emit(LogEvent logEvent)
-        {            
-            _messageQueue.Enqueue(logEvent);
-        }
-
-        private void Render(string xamlParagraphText)
         {
-            var richTextBox = _richTextBox;
-
-            lock (_syncRoot)
-            {
-                richTextBox.Write(xamlParagraphText);
-            }
+            _messageWriter.TryWrite(logEvent);
         }
 
         public void Dispose()
         {
+            _messageWriter.TryComplete();
         }
 
-        internal delegate void RenderAction(string xamlParagraphText);
     }
 }
