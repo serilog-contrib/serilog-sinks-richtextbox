@@ -35,11 +35,11 @@ jobs:
     runs-on: ${{ matrix.job.os }}
     steps:
       - name: Setup netcoreapp3.1
-        uses: actions/setup-dotnet@v1.9.1
+        uses: actions/setup-dotnet@v2
         with:
           dotnet-version: "3.1.413"
       - name: Setup net5.0
-        uses: actions/setup-dotnet@v1.9.1
+        uses: actions/setup-dotnet@v2
         with:
           dotnet-version: "5.0.401"
       - name: Run dotnet --info
