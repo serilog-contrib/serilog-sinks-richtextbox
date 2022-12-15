@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0-windows;netcoreapp3.1;net462</TargetFrameworks>
+    <TargetFrameworks>net6.0-windows;net5.0-windows;netcoreapp3.1;net462</TargetFrameworks>
     <AssemblyName>Serilog.Sinks.RichTextBox.Wpf.Tests</AssemblyName>
     <IsPackable>false</IsPackable>
     <AssemblyOriginatorKeyFile>../../asset/Serilog.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
-    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <PublicSign>true</PublicSign>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <TreatSpecificWarningsAsErrors />
   </PropertyGroup>

@@ -1,7 +1,11 @@
 ﻿<Project>
 
   <PropertyGroup>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>11.0</LangVersion>
+    <NoWarn>$(NoWarn);NU5048;CS8032</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <TreatSpecificWarningsAsErrors />
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
   </PropertyGroup>
 
   <ItemGroup>

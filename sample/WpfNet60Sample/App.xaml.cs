@@ -19,12 +19,12 @@ using System.Diagnostics;
 using System.Windows;
 using Serilog;
 
-namespace WpfNet462Sample
+namespace WpfNet60Sample
 {
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App
+    public partial class App : Application
     {
         protected override void OnStartup(StartupEventArgs e)
         {

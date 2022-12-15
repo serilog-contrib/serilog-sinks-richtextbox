@@ -16,19 +16,18 @@
 
 using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using Serilog;
 using Serilog.Debugging;
 
-namespace WpfNet462Sample
+namespace WpfNet60Sample
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow
+    public partial class MainWindow : Window
     {
         private static readonly object _syncRoot = new object();
 
@@ -113,7 +112,7 @@ namespace WpfNet462Sample
         {
             Parallel.For(1, 101, stepNumber =>
             {
-                var stepName = $"Step {stepNumber.ToString("000", CultureInfo.InvariantCulture)}";
+                var stepName = FormattableString.Invariant($"Step {stepNumber:000}");
 
                 Log.Verbose("Hello from Parallel.For({StepName}) Verbose", stepName);
                 Log.Debug("Hello from Parallel.For({StepName}) Debug", stepName);
@@ -133,7 +132,7 @@ namespace WpfNet462Sample
                 var stepNumber = i;
                 var task = Task.Run(() =>
                 {
-                    var stepName = $"Step {stepNumber.ToString("000", CultureInfo.InvariantCulture)}";
+                    var stepName = FormattableString.Invariant($"Step {stepNumber:000}");
 
                     Log.Verbose("Hello from Task.Run({StepName}) Verbose", stepName);
                     Log.Debug("Hello from Task.Run({StepName}) Debug", stepName);

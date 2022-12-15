@@ -1,0 +1,70 @@
+﻿<Window x:Class="WpfNet60Sample.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfNet60Sample"
+        mc:Ignorable="d"
+        Title="MainWindow (WPF on .NET 6)"
+                Width="800"
+        Height="600"
+        Background="Black"
+        Foreground="LightGray"
+        WindowStartupLocation="CenterScreen"
+        Loaded="MainWindow_OnLoaded">
+    <DockPanel>
+        <ToolBarTray DockPanel.Dock="Top">
+            <ToolBar>
+                <Button
+                    Content="Clear"
+                    Click="Clear_OnClick" />
+                <Separator />
+                <Button
+                    Content="Verbose"
+                    Click="LogVerbose_OnClick" />
+                <Separator />
+                <Button
+                    Content="Debug"
+                    Click="LogDebug_OnClick" />
+                <Separator />
+                <Button
+                    Content="Information"
+                    Click="LogInformation_OnClick" />
+                <Separator />
+                <Button
+                    Content="Warning"
+                    Click="LogWarning_OnClick" />
+                <Separator />
+                <Button
+                    Content="Error"
+                    Click="LogError_OnClick" />
+                <Separator />
+                <Button
+                    Content="Fatal"
+                    Click="LogFatal_OnClick" />
+            </ToolBar>
+            <ToolBar>
+                <Button
+                    Content="Parallel.For(100*6)"
+                    Click="LogParallelFor_OnClick" />
+            </ToolBar>
+            <ToolBar>
+                <Button
+                    Content="Task.Run(100*6)"
+                    Click="LogTaskRun_OnClick" />
+            </ToolBar>
+        </ToolBarTray>
+
+        <RichTextBox
+            x:Name="_richTextBox"
+            Background="Black"
+            Foreground="LightGray"
+            FontFamily="Cascadia Mono, Consolas, Courier New, monospace"
+            FontSize="14"
+            IsReadOnly="True"
+            VerticalScrollBarVisibility="Auto"
+            HorizontalScrollBarVisibility="Auto"
+            Margin="0"
+        />
+    </DockPanel>
+</Window>
