@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0-windows;netcoreapp3.1;net462</TargetFrameworks>
+    <TargetFrameworks>net6.0-windows;net5.0-windows;netcoreapp3.1;net462</TargetFrameworks>
     <UseWPF>true</UseWPF>
     <RootNamespace>Serilog</RootNamespace>
 
@@ -20,7 +20,7 @@
 
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>../../asset/Serilog.snk</AssemblyOriginatorKeyFile>
-    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <PublicSign>true</PublicSign>
 
     <NoWarn>$(NoWarn);NU5048</NoWarn>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -34,7 +34,7 @@
     <Authors>C. Augusto Proiete &amp; Contributors</Authors>
     <Company>augustoproiete.net</Company>
     <Description>A Serilog sink that writes log events to any WPF RichTextBox control with coloring and custom theme support.</Description>
-    <Copyright>Copyright 2021 C. Augusto Proiete &amp; Contributors - Provided under the Apache License, Version 2.0</Copyright>
+    <Copyright>Copyright 2021-2022 C. Augusto Proiete &amp; Contributors - Provided under the Apache License, Version 2.0</Copyright>
     <PackageTags>serilog;sinks;richtextbox;wpf;windows;sink;colored;colors;color;theme;themes;windows-presentation-foundation;textbox;serilog-sink;serilog-contrib;augustoproiete;augusto-proiete</PackageTags>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageIcon>images\icon.png</PackageIcon>
@@ -66,7 +66,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Serilog" Version="2.8.0" />
+    <PackageReference Include="Serilog" Version="2.12.0" />
 
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
   </ItemGroup>
