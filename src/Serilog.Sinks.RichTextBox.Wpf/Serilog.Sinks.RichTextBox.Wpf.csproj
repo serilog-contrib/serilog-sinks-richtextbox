@@ -20,7 +20,6 @@
 
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>../../asset/Serilog.snk</AssemblyOriginatorKeyFile>
-    <PublicSign>true</PublicSign>
 
     <NoWarn>$(NoWarn);NU5048</NoWarn>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
