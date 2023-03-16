@@ -50,7 +50,7 @@ jobs:
           dotnet-version: "7.0.101"
       - name: Run dotnet --info
         run: dotnet --info
-      - uses: actions/checkout@v3.3.0
+      - uses: actions/checkout@v3.4.0
         with:
           fetch-depth: 0
       - name: Build
