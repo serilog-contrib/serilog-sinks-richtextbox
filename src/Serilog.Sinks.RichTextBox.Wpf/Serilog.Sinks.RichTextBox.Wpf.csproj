@@ -33,7 +33,7 @@
     <Authors>C. Augusto Proiete &amp; Contributors</Authors>
     <Company>augustoproiete.net</Company>
     <Description>A Serilog sink that writes log events to any WPF RichTextBox control with coloring and custom theme support.</Description>
-    <Copyright>Copyright 2021-2022 C. Augusto Proiete &amp; Contributors - Provided under the Apache License, Version 2.0</Copyright>
+    <Copyright>Copyright 2021-2023 C. Augusto Proiete &amp; Contributors - Provided under the Apache License, Version 2.0</Copyright>
     <PackageTags>serilog;sinks;richtextbox;wpf;windows;sink;colored;colors;color;theme;themes;windows-presentation-foundation;textbox;serilog-sink;serilog-contrib;augustoproiete;augusto-proiete</PackageTags>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageIcon>images\icon.png</PackageIcon>
