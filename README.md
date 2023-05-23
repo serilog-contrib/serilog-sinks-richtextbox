@@ -127,4 +127,4 @@ Click on the [Releases](https://github.com/serilog-contrib/serilog-sinks-richtex
 
 ---
 
-_Copyright &copy; 2021-2022 C. Augusto Proiete & Contributors - Provided under the [Apache License, Version 2.0](LICENSE)._
+_Copyright &copy; 2021-2023 C. Augusto Proiete & Contributors - Provided under the [Apache License, Version 2.0](LICENSE)._
