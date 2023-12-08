@@ -22,6 +22,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
+using System.Threading.Channels;
+using System.Threading.Tasks;
 using System.Windows.Threading;
 using Serilog.Core;
 using Serilog.Events;
@@ -43,8 +45,8 @@ namespace Serilog.Sinks.RichTextBox
         private const int _defaultWriteBufferCapacity = 256;
 
         private const int _batchSize = 200;
-        private Thread _consumerThread;
-        private ConcurrentQueue<LogEvent> _messageQueue;
+        private Task _consumerTask;
+        private Channel<LogEvent> _messageQueue;
 
         public RichTextBoxSink(IRichTextBox richTextBox, ITextFormatter formatter, DispatcherPriority dispatcherPriority, object syncRoot)
         {
@@ -62,10 +64,9 @@ namespace Serilog.Sinks.RichTextBox
 
             _renderAction = Render;
 
-            _messageQueue = new ConcurrentQueue<LogEvent>();
+            _messageQueue = Channel.CreateUnbounded<LogEvent>();
 
-            _consumerThread = new Thread(new ThreadStart(ProcessMessages)) { IsBackground = true };
-            _consumerThread.Start();
+            _consumerTask = Task.Run(ProcessMessages);
         }
 
         private enum States
@@ -75,70 +76,30 @@ namespace Serilog.Sinks.RichTextBox
             Log,
         }
 
-        private void ProcessMessages()
+        private async Task ProcessMessages()
         {
             StringBuilder sb = new();
-            Stopwatch sw = Stopwatch.StartNew();
-            States state = States.Init;
-            int msgCounter = 0;
 
             while (true)
             {
-                switch (state)
-                {
-                    //prepare the string builder and data
-                    case States.Init:
-                        sb.Clear();
-                        sb.Append($"<Paragraph xmlns =\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" xml:space=\"preserve\">");
-                        msgCounter = 0;
-                        state = States.Dequeue;
-                        break;
+                var logEvent = await _messageQueue.Reader.ReadAsync();
+                sb.Clear();
+                sb.Append($"<Paragraph xmlns =\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" xml:space=\"preserve\">");
 
-                    case States.Dequeue:
-                        if (sw.Elapsed.TotalMilliseconds >= 25 || msgCounter >= _batchSize)
-                        {
-                            if (msgCounter == 0)
-                            {
-                                //no messages, retick
-                                sw.Restart();
-                            }
-                            else
-                            {
-                                //valid log condition
-                                state = States.Log;
-                                break;
-                            }
-                        }
+                StringWriter writer = new();
+                _formatter.Format(logEvent, writer);
 
-                        if (_messageQueue.TryDequeue(out LogEvent logEvent) == false)
-                        {
-                            Thread.Sleep(1);
-                            continue;
-                        }
+                sb.Append(writer.ToString());
 
-                        StringWriter writer = new();
-                        _formatter.Format(logEvent, writer);
-
-                        //got a message from the queue, retick
-                        sw.Restart();
-
-                        msgCounter++;
-                        sb.Append(writer.ToString());
-                        break;
-
-                    case States.Log:
-                        sb.Append("</Paragraph>");
-                        string xamlParagraphText = sb.ToString();
-                        _richTextBox.BeginInvoke(_dispatcherPriority, _renderAction, xamlParagraphText);
-                        state = States.Init;
-                        break;
-                }
+                sb.Append("</Paragraph>");
+                string xamlParagraphText = sb.ToString();
+                await _richTextBox.BeginInvoke(_dispatcherPriority, _renderAction, xamlParagraphText);
             }
         }
 
         public void Emit(LogEvent logEvent)
-        {            
-            _messageQueue.Enqueue(logEvent);
+        {
+            _messageQueue.Writer.TryWrite(logEvent);
         }
 
         private void Render(string xamlParagraphText)
