@@ -21,7 +21,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Windows.Threading;
@@ -45,7 +44,7 @@ namespace Serilog.Sinks.RichTextBox
         private const int _defaultWriteBufferCapacity = 256;
 
         private const int _batchSize = 200;
-        private Task _consumerTask;
+        private const int _minimumDelayForIncompleteBatch = 25;
         private Channel<LogEvent> _messageQueue;
 
         public RichTextBoxSink(IRichTextBox richTextBox, ITextFormatter formatter, DispatcherPriority dispatcherPriority, object syncRoot)
@@ -66,34 +65,53 @@ namespace Serilog.Sinks.RichTextBox
 
             _messageQueue = Channel.CreateUnbounded<LogEvent>();
 
-            _consumerTask = Task.Run(ProcessMessages);
-        }
-
-        private enum States
-        {
-            Init,
-            Dequeue,
-            Log,
+            Task.Run(ProcessMessages);
         }
 
         private async Task ProcessMessages()
         {
-            StringBuilder sb = new();
+            int msgCounter = 0;
+            const string initial = $"<Paragraph xmlns =\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" xml:space=\"preserve\">";
+
+            var sb = new StringBuilder(initial);
+
+            async Task ReadChannelAsync()
+            {
+                var logEvent = await _messageQueue.Reader.ReadAsync();
+                StringWriter writer = new();
+                _formatter.Format(logEvent, writer);
+                msgCounter++;
+
+                sb.Append(writer.ToString());
+            }
+
+            Task restartTimer() => Task.Delay(_minimumDelayForIncompleteBatch);
+
+            Task incompleteBatchTask = restartTimer();
+            Task logEventTask = ReadChannelAsync();
 
             while (true)
             {
-                var logEvent = await _messageQueue.Reader.ReadAsync();
-                sb.Clear();
-                sb.Append($"<Paragraph xmlns =\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" xml:space=\"preserve\">");
+                var firstTask = await Task.WhenAny(incompleteBatchTask, logEventTask);
 
-                StringWriter writer = new();
-                _formatter.Format(logEvent, writer);
-
-                sb.Append(writer.ToString());
+                if (firstTask == logEventTask && msgCounter < _batchSize)
+                {
+                    logEventTask = ReadChannelAsync();
+                    continue;
+                }
+                else if (msgCounter == 0)
+                {
+                    //no messages, restart timer
+                    incompleteBatchTask = restartTimer();
+                    continue;
+                }
 
                 sb.Append("</Paragraph>");
                 string xamlParagraphText = sb.ToString();
                 await _richTextBox.BeginInvoke(_dispatcherPriority, _renderAction, xamlParagraphText);
+                sb.Clear();
+                sb.Append(initial);
+                msgCounter = 0;
             }
         }
 
