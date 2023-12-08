@@ -45,7 +45,7 @@ namespace Serilog.Sinks.RichTextBox
 
         private const int _batchSize = 200;
         private const int _minimumDelayForIncompleteBatch = 25;
-        private Channel<LogEvent> _messageQueue;
+        private Channel<LogEvent> _messageChannel;
 
         public RichTextBoxSink(IRichTextBox richTextBox, ITextFormatter formatter, DispatcherPriority dispatcherPriority, object syncRoot)
         {
@@ -63,7 +63,7 @@ namespace Serilog.Sinks.RichTextBox
 
             _renderAction = Render;
 
-            _messageQueue = Channel.CreateUnbounded<LogEvent>();
+            _messageChannel = Channel.CreateUnbounded<LogEvent>();
 
             Task.Run(ProcessMessages);
         }
@@ -77,7 +77,7 @@ namespace Serilog.Sinks.RichTextBox
 
             async Task<string> ReadChannelAsync()
             {
-                var logEvent = await _messageQueue.Reader.ReadAsync();
+                var logEvent = await _messageChannel.Reader.ReadAsync();
                 StringWriter writer = new();
                 _formatter.Format(logEvent, writer);
                 return writer.ToString();
@@ -120,7 +120,7 @@ namespace Serilog.Sinks.RichTextBox
 
         public void Emit(LogEvent logEvent)
         {
-            _messageQueue.Writer.TryWrite(logEvent);
+            _messageChannel.Writer.TryWrite(logEvent);
         }
 
         private void Render(string xamlParagraphText)
