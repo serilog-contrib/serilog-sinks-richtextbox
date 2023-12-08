@@ -73,31 +73,34 @@ namespace Serilog.Sinks.RichTextBox
             int msgCounter = 0;
             const string initial = $"<Paragraph xmlns =\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" xml:space=\"preserve\">";
 
-            var sb = new StringBuilder(initial);
+            StringBuilder sb = new(initial);
 
-            async Task ReadChannelAsync()
+            async Task<string> ReadChannelAsync()
             {
                 var logEvent = await _messageQueue.Reader.ReadAsync();
                 StringWriter writer = new();
                 _formatter.Format(logEvent, writer);
-                msgCounter++;
-
-                sb.Append(writer.ToString());
+                return writer.ToString();
             }
 
             Task restartTimer() => Task.Delay(_minimumDelayForIncompleteBatch);
 
-            Task incompleteBatchTask = restartTimer();
-            Task logEventTask = ReadChannelAsync();
+            var incompleteBatchTask = restartTimer();
+            var logEventTask = ReadChannelAsync();
 
             while (true)
             {
                 var firstTask = await Task.WhenAny(incompleteBatchTask, logEventTask);
 
-                if (firstTask == logEventTask && msgCounter < _batchSize)
+                if (firstTask == logEventTask)
                 {
-                    logEventTask = ReadChannelAsync();
-                    continue;
+                    sb.Append(await logEventTask);
+                    msgCounter++;
+                    if (msgCounter < _batchSize)
+                    {
+                        logEventTask = ReadChannelAsync();
+                        continue;
+                    }
                 }
                 else if (msgCounter == 0)
                 {
