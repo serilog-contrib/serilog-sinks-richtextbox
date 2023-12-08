@@ -21,7 +21,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Threading;
+using System.Threading.Channels;
+using System.Threading.Tasks;
 using System.Windows.Threading;
 using Serilog.Core;
 using Serilog.Events;
@@ -43,8 +44,8 @@ namespace Serilog.Sinks.RichTextBox
         private const int _defaultWriteBufferCapacity = 256;
 
         private const int _batchSize = 200;
-        private Thread _consumerThread;
-        private ConcurrentQueue<LogEvent> _messageQueue;
+        private const int _minimumDelayForIncompleteBatch = 25;
+        private Channel<LogEvent> _messageChannel;
 
         public RichTextBoxSink(IRichTextBox richTextBox, ITextFormatter formatter, DispatcherPriority dispatcherPriority, object syncRoot)
         {
@@ -62,83 +63,64 @@ namespace Serilog.Sinks.RichTextBox
 
             _renderAction = Render;
 
-            _messageQueue = new ConcurrentQueue<LogEvent>();
+            _messageChannel = Channel.CreateUnbounded<LogEvent>();
 
-            _consumerThread = new Thread(new ThreadStart(ProcessMessages)) { IsBackground = true };
-            _consumerThread.Start();
+            Task.Run(ProcessMessages);
         }
 
-        private enum States
+        private async Task ProcessMessages()
         {
-            Init,
-            Dequeue,
-            Log,
-        }
-
-        private void ProcessMessages()
-        {
-            StringBuilder sb = new();
-            Stopwatch sw = Stopwatch.StartNew();
-            States state = States.Init;
             int msgCounter = 0;
+            const string initial = $"<Paragraph xmlns =\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" xml:space=\"preserve\">";
+
+            StringBuilder sb = new(initial);
+
+            async Task<string> ReadChannelAsync()
+            {
+                var logEvent = await _messageChannel.Reader.ReadAsync();
+                StringWriter writer = new();
+                _formatter.Format(logEvent, writer);
+                return writer.ToString();
+            }
+
+            Task restartTimer() => Task.Delay(_minimumDelayForIncompleteBatch);
+
+            var incompleteBatchTask = restartTimer();
+            var logEventTask = ReadChannelAsync();
 
             while (true)
             {
-                switch (state)
+                var firstTask = await Task.WhenAny(incompleteBatchTask, logEventTask);
+
+                if (firstTask == logEventTask)
                 {
-                    //prepare the string builder and data
-                    case States.Init:
-                        sb.Clear();
-                        sb.Append($"<Paragraph xmlns =\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" xml:space=\"preserve\">");
-                        msgCounter = 0;
-                        state = States.Dequeue;
-                        break;
-
-                    case States.Dequeue:
-                        if (sw.Elapsed.TotalMilliseconds >= 25 || msgCounter >= _batchSize)
-                        {
-                            if (msgCounter == 0)
-                            {
-                                //no messages, retick
-                                sw.Restart();
-                            }
-                            else
-                            {
-                                //valid log condition
-                                state = States.Log;
-                                break;
-                            }
-                        }
-
-                        if (_messageQueue.TryDequeue(out LogEvent logEvent) == false)
-                        {
-                            Thread.Sleep(1);
-                            continue;
-                        }
-
-                        StringWriter writer = new();
-                        _formatter.Format(logEvent, writer);
-
-                        //got a message from the queue, retick
-                        sw.Restart();
-
-                        msgCounter++;
-                        sb.Append(writer.ToString());
-                        break;
-
-                    case States.Log:
-                        sb.Append("</Paragraph>");
-                        string xamlParagraphText = sb.ToString();
-                        _richTextBox.BeginInvoke(_dispatcherPriority, _renderAction, xamlParagraphText);
-                        state = States.Init;
-                        break;
+                    sb.Append(await logEventTask);
+                    msgCounter++;
+                    if (msgCounter < _batchSize)
+                    {
+                        logEventTask = ReadChannelAsync();
+                        continue;
+                    }
                 }
+                else if (msgCounter == 0)
+                {
+                    //no messages, restart timer
+                    incompleteBatchTask = restartTimer();
+                    continue;
+                }
+
+                sb.Append("</Paragraph>");
+                string xamlParagraphText = sb.ToString();
+                await _richTextBox.BeginInvoke(_dispatcherPriority, _renderAction, xamlParagraphText);
+                sb.Clear();
+                sb.Append(initial);
+                msgCounter = 0;
             }
         }
 
         public void Emit(LogEvent logEvent)
-        {            
-            _messageQueue.Enqueue(logEvent);
+        {
+            _messageChannel.Writer.TryWrite(logEvent);
         }
 
         private void Render(string xamlParagraphText)
