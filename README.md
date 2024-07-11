@@ -1,5 +1,5 @@
 | README.md |
-|:---|
+| :-------- |
 
 <div align="center">
 
@@ -74,14 +74,41 @@ Themes can be specified when configuring the sink:
 
 The following built-in themes are available at this time:
 
-| Theme                               | Description
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `RichTextBoxTheme.None`             | No styling. Uses default styles applied to the `RichTextBox` control                                                  |
+| Theme                               | Description                                                  |
+| ----------------------------------- | ------------------------------------------------------------ |
+| `RichTextBoxTheme.None`             | No styling. Uses default styles applied to the `RichTextBox` control |
 | `RichTextBoxConsoleTheme.Literate`  | Styled to replicate the default theme of  _Serilog.Sinks.Console_; **This is the default when no theme is specified** |
-| `RichTextBoxConsoleTheme.Grayscale` | A theme using only shades of gray, white, and black                                                                   |
-| `RichTextBoxConsoleTheme.Colored`   | A theme based on the original `Serilog.Sinks.ColoredConsole` sink                                                     |
+| `RichTextBoxConsoleTheme.Grayscale` | A theme using only shades of gray, white, and black          |
+| `RichTextBoxConsoleTheme.Colored`   | A theme based on the original `Serilog.Sinks.ColoredConsole` sink |
 
- Adding a new theme is straightforward; examples can be found in the [`RichTextBoxConsoleThemes`](src/Serilog.Sinks.RichTextBox.Wpf/Sinks/RichTextBox/Themes/RichTextBoxConsoleThemes.cs) class.
+Adding a new theme is straightforward; examples can be found in the [`RichTextBoxConsoleThemes`](src/Serilog.Sinks.RichTextBox.Wpf/Sinks/RichTextBox/Themes/RichTextBoxConsoleThemes.cs) class.
+
+You can also create a new theme inline. Example for white background:
+
+```csharp
+var customTheme = new RichTextBoxConsoleTheme
+(
+  new Dictionary<RichTextBoxThemeStyle, RichTextBoxConsoleThemeStyle>
+  {
+    [RichTextBoxThemeStyle.Text] = new RichTextBoxConsoleThemeStyle { Foreground = "#000000" },
+    [RichTextBoxThemeStyle.SecondaryText] = new RichTextBoxConsoleThemeStyle { Foreground = "#808080" },
+    [RichTextBoxThemeStyle.TertiaryText] = new RichTextBoxConsoleThemeStyle { Foreground = "#808080" },
+    [RichTextBoxThemeStyle.Invalid] = new RichTextBoxConsoleThemeStyle { Foreground = "#ffff00" },
+    [RichTextBoxThemeStyle.Null] = new RichTextBoxConsoleThemeStyle { Foreground = "#696969" },
+    [RichTextBoxThemeStyle.Name] = new RichTextBoxConsoleThemeStyle { Foreground = "#696969" },
+    [RichTextBoxThemeStyle.String] = new RichTextBoxConsoleThemeStyle { Foreground = "#696969" },
+    [RichTextBoxThemeStyle.Number] = new RichTextBoxConsoleThemeStyle { Foreground = "#696969" },
+    [RichTextBoxThemeStyle.Boolean] = new RichTextBoxConsoleThemeStyle { Foreground = "#696969" },
+    [RichTextBoxThemeStyle.Scalar] = new RichTextBoxConsoleThemeStyle { Foreground = "#696969" },
+    [RichTextBoxThemeStyle.LevelVerbose] = new RichTextBoxConsoleThemeStyle { Foreground = "#c0c0c0", Background = "#808080" },
+    [RichTextBoxThemeStyle.LevelDebug] = new RichTextBoxConsoleThemeStyle { Foreground = "#ffffff", Background = "#808080" },
+    [RichTextBoxThemeStyle.LevelInformation] = new RichTextBoxConsoleThemeStyle { Foreground = "#ffffff", Background = "#0000ff" },
+    [RichTextBoxThemeStyle.LevelWarning] = new RichTextBoxConsoleThemeStyle { Foreground = "#808080", Background = "#ffff00" },
+    [RichTextBoxThemeStyle.LevelError] = new RichTextBoxConsoleThemeStyle { Foreground = "#ffffff", Background = "#ff0000" },
+    [RichTextBoxThemeStyle.LevelFatal] = new RichTextBoxConsoleThemeStyle { Foreground = "#ffffff", Background = "#ff0000" },
+  }
+);
+```
 
 ### Output templates
 
